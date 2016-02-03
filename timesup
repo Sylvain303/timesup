@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Usage: timesup TIME
+#
+#  TIME - HH:MM
+#  echo "timesup" | at HH:MM
+
+icon=dialog-information
+msg="Il reste"
+#icon=dialog-error
+
+countdown=20
+for s in $(seq $countdown -1 1)
+do
+    notify-send "Time's up!" "$msg $s secondes" --icon=$icon --expire-time=200
+    sleep 1.5
+done
+
+#spaces
+s=" =================================================================================================================================================================================== "
+
+nb_stop=4
+for i in $(seq 1 $nb_stop)
+do
+    notify-send "Time's up!" "${s}FIN${s}" \
+        --icon=dialog-error --expire-time=20000
+done
