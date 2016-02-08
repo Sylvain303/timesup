@@ -2,26 +2,61 @@
 #
 # Usage: timesup TIME
 #
-#  TIME - HH:MM
-#  echo "timesup" | at HH:MM
-
-icon=dialog-information
-msg="Il reste"
-#icon=dialog-error
+#  TIME - HH:MM or now
+#  echo "timesup now" | at HH:MM
 
 countdown=20
+icon=dialog-information
+#icon=dialog-error
+
+msg="Il reste %d secondes"
+end_msg="FIN"
+nb_stop=4
+
+
+# check args
+if [[ $# -ne 1 ]] 
+then
+    echo "error: timesup TIME"
+    exit 1
+fi
+at_time=$1
+
+skip_at=0
+if [[ "$at_time" == "now" ]]
+then
+    skip_at=1
+fi
+
+regexp='^[0-9]{2}:[0-9]{2}$'
+if [[ $skip_at -eq 0 ]] && [[ ! "$at_time" =~ $regexp ]]
+then
+    echo "error: format for TIME: now or HH:MM"
+    exit 1
+fi
+
+# schedule delayed alarm
+if [[ $skip_at -eq 0 ]]
+then
+    echo "$(readlink -f $0) now" | at $at_time
+    exit 0
+fi
+
+# NOW !
+
+# countdown loop
 for s in $(seq $countdown -1 1)
 do
-    notify-send "Time's up!" "$msg $s secondes" --icon=$icon --expire-time=200
+    txt=$(printf "$msg" $s)
+    notify-send "Time's up!" "$txt" --icon=$icon --expire-time=200
     sleep 1.5
 done
 
-#spaces
 s=" =================================================================================================================================================================================== "
 
-nb_stop=4
+# STOP message
 for i in $(seq 1 $nb_stop)
 do
-    notify-send "Time's up!" "${s}FIN${s}" \
+    notify-send "Time's up!" "${s}$end_msg${s}" \
         --icon=dialog-error --expire-time=20000
 done
