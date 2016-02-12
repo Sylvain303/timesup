@@ -1,11 +1,19 @@
 #!/bin/bash
 #
-# Usage: timesup TIME
+# Usage: timesup TIME|now
 #
-#  TIME - HH:MM or now
-#  echo "timesup now" | at HH:MM
+#  TIME  start at the given schedule format HH:MM
+#
+# Behavior:
+#
+# at the given time, it countdowns some alerts
+# when the countdown is over it display a visible anoying message
+# after a lock_delay it locks the screen
+#
+# if the argument is 'now' it starts the countdown immediately
 
 countdown=20
+lock_delay=20
 icon=dialog-information
 #icon=dialog-error
 
@@ -60,3 +68,6 @@ do
     notify-send "Time's up!" "${s}$end_msg${s}" \
         --icon=dialog-error --expire-time=20000
 done
+
+sleep $lock_delay
+xflock4
