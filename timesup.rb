@@ -16,22 +16,22 @@
 #
 # If the argument is 'now' it starts the countdown immediately.
 
-COUNTDOWN=20
-LOCK_DELAY_SEC=20
+$COUNTDOWN=20
+$LOCK_DELAY_SEC=20
 
-ICON=dialog-information
+$ICON=dialog-information
 #ICON=dialog-error
 
-COUNTDOWN_MESG="Il reste %d secondes"
-LOCK_MESG="Voulez vous repousser le lock ?"
-DISABLE_LOCK="Il vous reste %d sec…"
-STOP_MESG="FIN"
-NB_STOP=4
-DELAY_MIN=1
+$COUNTDOWN_MESG="Il reste %d secondes"
+$LOCK_MESG="Voulez vous repousser le lock ?"
+$DISABLE_LOCK="Il vous reste %d sec…"
+$STOP_MESG="FIN"
+$NB_STOP=4
+$DELAY_MIN=1
 
 # functions definitions =================================================
 # Usage: check_args "$@"
-check_args() {
+def check_args()
     if [[ $# -lt 1 ]]
     then
         echo "error: timesup argument"
@@ -53,7 +53,7 @@ check_args() {
             AT_TIME=$1
             ;;
     esac
-}
+end
 
 schedule_delayed_alarm() {
     local at_time="$1"
@@ -79,7 +79,7 @@ schedule_delayed_alarm() {
     fi
 
     # can use at -m to recieve a debug mail
-    echo "$me now" | at $at_time
+    echo "$me now" | at -m $at_time
 }
 
 countdown_loop() {
