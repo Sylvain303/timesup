@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env ruby
 #
 # Intrusive visual alarm scheduled for xfce
 #
-# Usage: timesup TIME|now
+# Usage: timesup TIME|now|next
 #
 #  TIME  start at the given schedule format HH:MM
 #  now   timesup now!
@@ -20,7 +20,7 @@ $COUNTDOWN=20
 $LOCK_DELAY_SEC=20
 
 $ICON=dialog-information
-#ICON=dialog-error
+#$ICON=dialog-error
 
 $COUNTDOWN_MESG="Il reste %d secondes"
 $LOCK_MESG="Voulez vous repousser le lock ?"
@@ -31,28 +31,26 @@ $DELAY_MIN=1
 
 # functions definitions =================================================
 # Usage: check_args "$@"
-def check_args()
-    if [[ $# -lt 1 ]]
+def check_args(args)
+    if args.size < 1
     then
-        echo "error: timesup argument"
-        exit 1
-    fi
+        puts "error: timesup argument"
+        return false
+    end
 
     # 3 kind of argument
-    SKIP_AT=0
-    case "$1" in
-        now)
-            SKIP_AT=1
-            ;;
-        next)
-            # compute now +delay
-            AT_TIME=$(next_time $DELAY_MIN)
-            ;;
-        *)
-            # will match a timespec HH:MM
-            AT_TIME=$1
-            ;;
-    esac
+    $SKIP_AT=0
+    case args[1]
+    when 'now'
+      $SKIP_AT = 1
+    next)
+      # compute now +delay
+      $AT_TIME = next_time $DELAY_MIN
+    else
+      # will match a timespec HH:MM
+      $AT_TIME= args[1]
+    end
+    return true
 end
 
 schedule_delayed_alarm() {
