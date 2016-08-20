@@ -4,7 +4,7 @@
 #
 # Usage: timesup TIME|now
 #
-#  TIME  start at the given schedule format HH:MM
+#  TIME  start at the given schedule format HH:[MM] or +1h +15m
 #  now   timesup now!
 #  next  report for $DELAY_MIN minutes
 #
@@ -56,20 +56,54 @@ check_args() {
 }
 
 schedule_delayed_alarm() {
-    local at_time="$1"
+    dryrun=false
+    # debug dryrun
+    if [[ "$1" == -n ]]
+    then
+        dryrun=true
+        shift
+    fi
+
+    local time_in="$1"
+    local at_time=""
 
     # timespec validation
-    local regexp='^[0-9]{2}:([0-9]{2})?$'
-    if [[ ! "$at_time" =~ $regexp ]]
+    # match [H]H:[MM]
+    local regexp='^([0-9]{1,2}:)([0-9]{2})?$'
+    # match +1h or +22m
+    local reg_plus='\+([0-9]+)([mh])'
+    if [[ "$time_in" =~ $regexp ]]
     then
-        echo "format error: HH:MM"
+        local hour=${BASH_REMATCH[1]}
+        local min=${BASH_REMATCH[2]}
+
+        if [[ ${#hour} -lt 3 ]]
+        then
+            hour="0$hour"
+        fi
+
+        # allow param shortcut [H]H:
+        if [[ "$min" == "" ]]
+        then
+            at_time="${hour}00"
+        else
+            at_time="${hour}$min"
+        fi
+    elif [[ "$time_in" =~ $reg_plus ]]
+    then
+        # replace abrev
+        local unit=${BASH_REMATCH[2]/m/minutes}
+        unit=${unit/h/hours}
+        at_time="now+${BASH_REMATCH[1]}${unit}"
+    else
+        echo "format error: HH:[MM] or +1h +2m"
         exit 1
     fi
 
-    # allow param shortcut HH:
-    if [[ "${BASH_REMATCH[1]}" == "" ]]
+    if [[ -z "$at_time" ]]
     then
-        at_time="${at_time}00"
+        echo "error: \$at_time is empty"
+        exit 1
     fi
 
     if [[ -z "$me" ]]
@@ -78,8 +112,13 @@ schedule_delayed_alarm() {
         exit 1
     fi
 
-    # can use at -m to recieve a debug mail
-    echo "$me now" | at $at_time
+    if $dryrun
+    then
+        echo "at_time=$at_time"
+    else
+        # can use at -m to recieve a debug mail
+        echo "$me now" | at $at_time
+    fi
 }
 
 countdown_loop() {
