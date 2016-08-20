@@ -2,11 +2,17 @@
 
 Small, but still efficient, reminder alarm for GNU/Linux
 
-## about
+## About
+
+**Lecteur Francophone** : demandez la traduction, je la ferai.
+
 
 A tiny shell script that allows you to setup an intrusive reminder.
 
 At the given time, a visually annoying reminder will popup after a count down.
+When the count down is reached the screen is locked.
+
+A popup will allow you to delay the lock for 1 minute.
 
 ## See Also
 

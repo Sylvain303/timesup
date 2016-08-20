@@ -2,6 +2,8 @@
 #
 # Intrusive visual alarm scheduled for xfce
 #
+# LICENSE: GPL V3
+#
 # Usage: timesup TIME|now
 #
 #  TIME  start at the given schedule format HH:[MM] or +1h +15m
