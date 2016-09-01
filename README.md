@@ -19,3 +19,4 @@ A popup will allow you to delay the lock for 1 minute.
 * https://github.com/anko/hudkit - HUD Head-Up Display
 * https://wiki.archlinux.org/index.php/Desktop_notifications
 * http://superuser.com/questions/164047/how-to-get-accurate-window-information-dimensions-etc-in-linux-x
+* https://github.com/the-cavalry/light-locker/issues/85 - delay or prevent login for an short period after locking screen
