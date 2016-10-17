@@ -4,11 +4,17 @@
 #
 # LICENSE: GPL V3
 #
-# Usage: timesup TIME|now
+# Usage: timesup TIME
+#        timesup now
+#        timesup skip
+#        timesup call FUNCTION_NAME
 #
+# Options:
 #  TIME  start at the given schedule format HH:[MM] or +1h +15m
 #  now   timesup now!
 #  next  report for $DELAY_MIN minutes
+#  skip  during the ending delay only disable the current running timesup
+#  call  call FUNCTION_NAME which must be a function inside the code ex: remove_timer
 #
 # Behavior:
 #
@@ -24,12 +30,16 @@ LOCK_DELAY_SEC=20
 ICON=dialog-information
 #ICON=dialog-error
 
+# variables
 COUNTDOWN_MESG="Il reste %d secondes"
 LOCK_MESG="Voulez vous repousser le lock ?"
 DISABLE_LOCK="Il vous reste %d sec…"
 STOP_MESG="FIN"
 NB_STOP=4
 DELAY_MIN=1
+
+## globals INIT
+DISABLE_CURRENT=0
 
 # functions definitions =================================================
 # Usage: check_args "$@"
@@ -49,6 +59,16 @@ check_args() {
         next)
             # compute now +delay
             AT_TIME=$(next_time $DELAY_MIN)
+            ;;
+        skip)
+            DISABLE_CURRENT=1
+            ;;
+        call)
+            # call a function directly in the code
+            RUN=$2
+            shift
+            $RUN "$@"
+            exit 0
             ;;
         *)
             # will match a timespec HH:MM
@@ -108,9 +128,9 @@ schedule_delayed_alarm() {
         exit 1
     fi
 
-    if [[ -z "$me" ]]
+    if [[ -z "$ME" ]]
     then
-        echo "error: \$me is empty"
+        echo "error: \$ME is empty"
         exit 1
     fi
 
@@ -119,7 +139,7 @@ schedule_delayed_alarm() {
         echo "at_time=$at_time"
     else
         # can use at -m to recieve a debug mail
-        echo "$me now" | at $at_time
+        echo "$ME now" | at $at_time
     fi
 }
 
@@ -138,7 +158,7 @@ countdown_loop() {
 
 # Usage: display_stop_message $nb_stop
 display_stop_message() {
-    # STOP message
+    # STOP message
     # almost all screen wide
     local s=" =================================================================================================================================================================================== "
     local i
@@ -170,9 +190,53 @@ next_time() {
     date '+%R' -d "now +$delay_min minutes"
 }
 
+# how to be sure that we are removing a timesup timer in atq?
+#  LC_TIME=en_US.UTF-8 date
+#  Tue Aug 30 10:28:20 CEST 2016
+#  sylvain@laptop-sylvain:~/code/timesup$ atq
+#  345  Tue Aug 30 10:28:00 2016 = sylvain
+# remove_timer() : is not used in the code, it removes all timesup_jobs
+remove_timer() {
+    # list jobs
+    local timesup_jobs=$(atq | awk '{print $1}')
+    local match="$ME now"
+    for j in $timesup_jobs
+    do
+        # at -c list the shell code of the task
+        echo "checking '$match in job: $j"
+
+        if at -c $j | grep -q "$match"
+        then
+            atq $j
+            atrm $(atq | awk '{print $1}')
+        fi
+    done
+}
+
 # Usage: main "$@"
 main() {
     check_args "$@"
+
+    if [[ $DISABLE_CURRENT -eq 1 ]]
+    then
+        # find running task (at queue =)
+        # not used, because killing during countdown doesn't reset a new task
+        #local task=$(atq -q = | awk '{print $1}')
+		#task=$(($task + 1))
+
+        # stop running count down if any
+
+# daemon     919  0.0  0.0  26044  2364 ?        Ss   07:16   0:00 /usr/sbin/atd -f
+# daemon    5035  0.0  0.0  67792  3432 ?        S    12:13   0:00  \_ /usr/sbin/atd -f
+# sylvain   5037  0.0  0.0   4508   788 ?        SN   12:13   0:00      \_ sh
+# sylvain   5038  0.3  0.0  28600  3444 ?        SN   12:13   0:00          \_ /bin/bash /home/sylvain/code/timesup/timesup now
+#
+        # will only find running timesup
+		pkill --signal TERM -f "$ME now"
+
+        # we dont need to remove anything in the atq
+        exit 0
+    fi
 
     # schedule delayed alarm
     if [[ $SKIP_AT -eq 0 ]]
@@ -199,8 +263,8 @@ main() {
 
 # ============================================= main script code
 
-# when sourced $me has no significant value
-me=$(readlink -f $0)
+# when sourced $ME has no significant value
+ME=$(readlink -f $0)
 
 # sourcing code detection, if code is sourced for debug purpose,
 # main is not executed.
