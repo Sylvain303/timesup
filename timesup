@@ -232,7 +232,7 @@ main() {
 # sylvain   5038  0.3  0.0  28600  3444 ?        SN   12:13   0:00          \_ /bin/bash /home/sylvain/code/timesup/timesup now
 #
         # will only find running timesup
-		pkill --signal TERM -f "$ME now"
+		pkill --signal TERM -f "$ME now" && echo "OK disabled"
 
         # we dont need to remove anything in the atq
         exit 0
