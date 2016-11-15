@@ -1,18 +1,65 @@
 # timesup
 
-Small, but still efficient, reminder alarm for GNU/Linux
+Command line reminder alarm for GNU/Linux, with graphical display for XFCE.
 
 ## About
 
-**Lecteur Francophone** : demandez la traduction, je la ferai.
+**Lecteur Francophone** : demandez pour une traduction.
 
-
-A tiny shell script that allows you to setup an intrusive reminder.
+A tiny shell script that allows you to setup an intrusive reminder/lock. Tested on XFCE under xubuntu.
 
 At the given time, a visually annoying reminder will popup after a count down.
-When the count down is reached the screen is locked.
-
 A popup will allow you to delay the lock for 1 minute.
+When the popup delay is reached the screen is locked.
+
+You can also kill the timer during the count down.
+
+The goal of this command is to stop yourself when you need it.
+
+## Usage
+
+reminder/lock after 12 minutes
+
+~~~bash
+timesup +12m
+~~~
+
+full help
+
+~~~bash
+timesup --help
+~~~
+
+kill the timer (during the count down)
+
+~~~bash
+timesup skip
+~~~
+
+at list tasks
+
+~~~bash
+atq
+~~~
+
+kill a task
+
+~~~bash
+atrm 1234
+~~~
+
+## Require
+
+Use at to schedule timed command (itself).
+
+~~~
+apt install at
+~~~
+
+## Screenshot
+
+![screenshot_timesup.png](screenshot_timesup.png)
+
 
 ## See Also
 
