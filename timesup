@@ -8,6 +8,7 @@
 #        timesup now
 #        timesup skip
 #        timesup call FUNCTION_NAME
+#        timesup +3m
 #
 # Options:
 #  TIME  start at the given schedule format: [H]H:[MM] or relativ +1h +15m or 12h13
@@ -73,7 +74,7 @@ check_args() {
             exit 0
             ;;
         *)
-            # will match a timespec HH:MM
+            # will match a timespec HH:MM, +13m, 2h22
             AT_TIME=$1
             ;;
     esac
@@ -224,7 +225,7 @@ main() {
         # find running task (at queue =)
         # not used, because killing during countdown doesn't reset a new task
         #local task=$(atq -q = | awk '{print $1}')
-		#task=$(($task + 1))
+    #task=$(($task + 1))
 
         # stop running count down if any
 
@@ -233,8 +234,8 @@ main() {
 # sylvain   5037  0.0  0.0   4508   788 ?        SN   12:13   0:00      \_ sh
 # sylvain   5038  0.3  0.0  28600  3444 ?        SN   12:13   0:00          \_ /bin/bash /home/sylvain/code/timesup/timesup now
 #
-        # will only find running timesup
-		pkill --signal TERM -f "$ME now" && echo "OK disabled"
+        # will only find the current running timesup
+        pkill --signal TERM -f "$ME now" && echo "OK disabled"
 
         # we dont need to remove anything in the atq
         exit 0
